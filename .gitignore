@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# Расшифровки встреч и любые записи разговоров — не для публичного репозитория
+Transcrib/
+*.transcript.json
+*.vtt
+*.srt
+
+# Персональные финансовые данные: выгрузки, чеки, отчёты
+*.csv
+*.ofx
+*.qif
+statements/
+receipts/
+
+# Локальные настройки редакторов и Claude Code
+.vscode/
+.idea/
+.claude/settings.local.json
+
+# Секреты
+.env
+.env.*
+*.key
+*.pem
