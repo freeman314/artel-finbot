@@ -1,0 +1,49 @@
+name: own-folder
+
+# Проверяет, что автор pull request'а меняет только свою папку.
+# Общие файлы (README.md, CLAUDE.md, .gitignore, common/, .github/) пропускаются:
+# их сторожит CODEOWNERS — там нужен апрув другого участника.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  own-folder:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Автор меняет только свою папку
+        env:
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          # Карта «github-логин → папка участника».
+          # TODO: добавить остальных участников по мере появления их логинов.
+          declare -A FOLDER=(
+            [freeman314]=vasily
+          )
+
+          own="${FOLDER[$AUTHOR]:-}"
+          if [ -z "$own" ]; then
+            echo "::warning::Логин $AUTHOR не привязан к папке — разрешены только общие файлы."
+          fi
+
+          fail=0
+          while IFS= read -r f; do
+            case "$f" in
+              README.md|CLAUDE.md|.gitignore|common/*|.github/*) continue ;;
+            esac
+            if [ -n "$own" ] && [[ "$f" == "$own"/* ]]; then
+              continue
+            fi
+            echo "::error file=$f::$AUTHOR не может менять «$f» — это вне папки «$own»."
+            fail=1
+          done < <(git diff --name-only "$BASE_SHA...$HEAD_SHA")
+
+          exit $fail
