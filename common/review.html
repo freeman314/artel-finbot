@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Требования и разночтения — Артель · Финбот (v1)</title>
+</head>
+<body>
+<style>
+  :root {
+    --paper:#edefe9; --card:#f9faf5; --ink:#17201c; --muted:#5b665e;
+    --line:#d6dacf; --line-soft:#e2e5db;
+    --accent:#1f5c53; --accent-ink:#164a42; --accent-soft:rgba(31,92,83,.09);
+    --agree:#2e6b40; --agree-soft:rgba(46,107,64,.11);
+    --tension:#9c5a12; --tension-soft:rgba(156,90,18,.11);
+    --neutral-chip:rgba(91,102,94,.13);
+    --serif:"Palatino Linotype","Book Antiqua",Palatino,Georgia,"Times New Roman",serif;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","Cascadia Code","Segoe UI Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:#101413; --card:#171d19; --ink:#e7eae4; --muted:#9aa79e;
+      --line:#29312b; --line-soft:#212823;
+      --accent:#5cb4a6; --accent-ink:#7ec7bb; --accent-soft:rgba(92,180,166,.13);
+      --agree:#6fbb84; --agree-soft:rgba(111,187,132,.14);
+      --tension:#d69a52; --tension-soft:rgba(214,154,82,.14);
+      --neutral-chip:rgba(154,167,158,.16);
+    }
+  }
+  :root[data-theme="light"] {
+    --paper:#edefe9; --card:#f9faf5; --ink:#17201c; --muted:#5b665e;
+    --line:#d6dacf; --line-soft:#e2e5db;
+    --accent:#1f5c53; --accent-ink:#164a42; --accent-soft:rgba(31,92,83,.09);
+    --agree:#2e6b40; --agree-soft:rgba(46,107,64,.11);
+    --tension:#9c5a12; --tension-soft:rgba(156,90,18,.11);
+    --neutral-chip:rgba(91,102,94,.13);
+  }
+  :root[data-theme="dark"] {
+    --paper:#101413; --card:#171d19; --ink:#e7eae4; --muted:#9aa79e;
+    --line:#29312b; --line-soft:#212823;
+    --accent:#5cb4a6; --accent-ink:#7ec7bb; --accent-soft:rgba(92,180,166,.13);
+    --agree:#6fbb84; --agree-soft:rgba(111,187,132,.14);
+    --tension:#d69a52; --tension-soft:rgba(214,154,82,.14);
+    --neutral-chip:rgba(154,167,158,.16);
+  }
+
+  * { box-sizing:border-box; }
+  body {
+    background:var(--paper); color:var(--ink);
+    font-family:var(--sans); line-height:1.6;
+    font-size:16.5px; margin:0;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap { max-width:840px; margin:0 auto; padding:clamp(20px,5vw,64px) clamp(18px,5vw,40px) 80px; }
+
+  /* ---------- header ---------- */
+  .eyebrow {
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.22em;
+    text-transform:uppercase; color:var(--accent); margin:0 0 14px;
+  }
+  h1 {
+    font-family:var(--serif); font-weight:600; font-size:clamp(2rem,5.4vw,3.1rem);
+    line-height:1.08; letter-spacing:-.01em; text-wrap:balance; margin:0 0 18px;
+  }
+  .lede { font-size:1.06rem; color:var(--muted); max-width:60ch; margin:0 0 26px; }
+
+  .meta-grid {
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1px; background:var(--line); border:1px solid var(--line);
+    border-radius:10px; overflow:hidden; margin:0 0 14px;
+  }
+  .meta-cell { background:var(--card); padding:13px 16px; }
+  .meta-cell .k { font-family:var(--mono); font-size:.66rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted); margin:0 0 5px; }
+  .meta-cell .v { font-size:.95rem; font-weight:600; }
+  .meta-cell .v.tabular { font-variant-numeric:tabular-nums; }
+
+  .dist {
+    display:flex; flex-wrap:wrap; align-items:baseline; gap:6px 10px;
+    font-size:.9rem; color:var(--muted); margin:0 0 30px; padding:2px 2px;
+  }
+  .dist b { color:var(--ink); font-weight:600; }
+  .who { font-family:var(--mono); font-size:.82rem; }
+  .who .out { color:var(--tension); }
+
+  .callout-draft {
+    border-left:3px solid var(--accent); background:var(--accent-soft);
+    padding:14px 18px; border-radius:0 8px 8px 0; margin:0 0 40px;
+    font-size:.92rem; color:var(--ink);
+  }
+  .callout-draft b { color:var(--accent-ink); }
+
+  /* ---------- section headers ---------- */
+  .sec-head { margin:56px 0 22px; }
+  .sec-head .n {
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--accent); display:block; margin:0 0 8px;
+  }
+  h2 {
+    font-family:var(--serif); font-weight:600; font-size:1.72rem;
+    letter-spacing:-.01em; margin:0; padding-bottom:14px;
+    border-bottom:1px solid var(--line); text-wrap:balance;
+  }
+  h2 .count { font-family:var(--mono); font-size:.85rem; color:var(--muted);
+    font-weight:400; margin-left:10px; letter-spacing:.02em; }
+
+  /* ---------- legend ---------- */
+  .legend { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+    gap:12px 26px; margin:0 0 8px; font-size:.88rem; color:var(--muted); }
+  .legend div { display:flex; gap:10px; align-items:baseline; }
+
+  /* ---------- chips ---------- */
+  .chip {
+    font-family:var(--mono); font-size:.68rem; letter-spacing:.06em;
+    padding:2px 8px; border-radius:5px; white-space:nowrap; font-weight:500;
+    display:inline-block; line-height:1.5;
+  }
+  .chip.agree { background:var(--agree-soft); color:var(--agree); }
+  .chip.solo  { background:transparent; color:var(--muted); border:1px solid var(--line); }
+  .chip.vote  { background:var(--tension-soft); color:var(--tension); }
+  .chip.clarify { background:var(--neutral-chip); color:var(--muted); }
+  .chip.done  { background:var(--agree-soft); color:var(--agree); }
+  .chip.nodata { background:var(--tension-soft); color:var(--tension); }
+
+  /* ---------- theme groups (prd) ---------- */
+  .theme { margin:0 0 30px; }
+  .theme > h3 {
+    font-family:var(--sans); font-size:.78rem; font-weight:700; letter-spacing:.13em;
+    text-transform:uppercase; color:var(--muted); margin:0 0 14px;
+  }
+  .req { padding:0 0 15px; margin:0 0 15px; border-bottom:1px solid var(--line-soft); }
+  .req:last-child { border-bottom:none; margin-bottom:0; padding-bottom:0; }
+  .req-top { display:flex; flex-wrap:wrap; gap:8px 12px; align-items:baseline; margin:0 0 5px; }
+  .req-title { font-weight:650; font-size:1rem; }
+  .req p { margin:4px 0 8px; font-size:.96rem; }
+  .req .note { color:var(--muted); font-size:.88rem; }
+  .tags { font-family:var(--mono); font-size:.78rem; color:var(--accent-ink);
+    display:flex; flex-wrap:wrap; gap:4px 12px; }
+  .tags .t::before { content:"— "; color:var(--muted); }
+
+  /* ---------- contradiction cards ---------- */
+  .cx {
+    background:var(--card); border:1px solid var(--line);
+    border-radius:12px; padding:22px 24px; margin:0 0 20px;
+    border-top:3px solid var(--tension);
+  }
+  .cx.soft { border-top-color:var(--accent); }
+  .cx-head { display:flex; flex-wrap:wrap; gap:10px 14px; align-items:baseline;
+    justify-content:space-between; margin:0 0 16px; }
+  .cx-head h3 { font-family:var(--serif); font-size:1.28rem; font-weight:600;
+    margin:0; letter-spacing:-.01em; }
+  .cx-head h3 .mark { color:var(--tension); margin-right:6px; }
+  .cx.soft .cx-head h3 .mark { color:var(--accent); }
+
+  .sides { list-style:none; padding:0; margin:0 0 16px;
+    display:flex; flex-direction:column; gap:10px; }
+  .side { display:grid; grid-template-columns:26px 1fr; gap:12px; align-items:start; }
+  .side .lab {
+    font-family:var(--mono); font-weight:700; font-size:.82rem;
+    color:var(--tension); background:var(--tension-soft);
+    width:26px; height:26px; border-radius:6px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .cx.soft .side .lab { color:var(--accent); background:var(--accent-soft); }
+  .side .body { font-size:.95rem; }
+  .side .body .tag { display:block; font-family:var(--mono); font-size:.76rem;
+    color:var(--muted); margin-top:3px; }
+  .side.ctx .lab { color:var(--muted); background:var(--neutral-chip); font-size:.9rem; }
+  .side.ctx .body { color:var(--muted); font-size:.9rem; font-style:italic; }
+
+  .prop { font-size:.92rem; color:var(--muted); margin:0 0 14px;
+    padding-left:14px; border-left:2px solid var(--line); }
+  .prop b { color:var(--ink); font-weight:600; font-style:normal; }
+
+  .rec {
+    background:var(--accent-soft); border-radius:9px; padding:14px 16px;
+    margin:0 0 16px; font-size:.95rem;
+  }
+  .rec .rl {
+    font-family:var(--mono); font-size:.68rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--accent-ink); font-weight:600;
+    display:flex; align-items:center; gap:8px; margin:0 0 7px;
+  }
+  .rec .rl::before { content:""; width:14px; height:2px; background:var(--accent); display:inline-block; }
+
+  .cx-foot { display:flex; flex-wrap:wrap; gap:10px 20px; align-items:center;
+    padding-top:14px; border-top:1px solid var(--line-soft); font-size:.85rem; }
+  .cx-foot .f { display:flex; align-items:baseline; gap:8px; }
+  .cx-foot .fk { font-family:var(--mono); font-size:.68rem; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--muted); }
+  .cx-foot .decision { color:var(--muted); font-family:var(--mono); }
+
+  /* ---------- next steps / versions ---------- */
+  .steps { counter-reset:step; list-style:none; padding:0; margin:8px 0 0;
+    display:flex; flex-direction:column; gap:14px; }
+  .steps li { display:grid; grid-template-columns:30px 1fr; gap:14px; align-items:start; }
+  .steps li::before {
+    counter-increment:step; content:counter(step);
+    font-family:var(--mono); font-weight:700; font-size:.85rem; color:var(--accent-ink);
+    background:var(--accent-soft); width:30px; height:30px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .steps p { margin:3px 0 0; }
+  .steps b { font-weight:650; }
+
+  table.ver { width:100%; border-collapse:collapse; margin:16px 0 0; font-size:.9rem; }
+  table.ver th, table.ver td { text-align:left; padding:10px 12px; border-bottom:1px solid var(--line-soft); }
+  table.ver th { font-family:var(--mono); font-size:.66rem; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--muted); font-weight:500; }
+  table.ver td.v { font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap; }
+
+  footer { margin-top:60px; padding-top:22px; border-top:1px solid var(--line);
+    font-size:.82rem; color:var(--muted); }
+  footer code { font-family:var(--mono); font-size:.82em; background:var(--neutral-chip);
+    padding:1px 6px; border-radius:4px; }
+  footer a { color:var(--accent-ink); }
+
+  .reveal { opacity:0; transform:translateY(8px); animation:rise .5s ease forwards; }
+  @keyframes rise { to { opacity:1; transform:none; } }
+  @media (prefers-reduced-motion: reduce) { .reveal { animation:none; opacity:1; transform:none; } }
+
+  @media print {
+    body { background:#fff; font-size:11pt; }
+    .wrap { max-width:none; padding:0; }
+    .cx, .meta-grid { break-inside:avoid; }
+    .reveal { animation:none; opacity:1; transform:none; }
+    * { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  }
+</style>
+
+<div class="wrap">
+  <header class="reveal">
+    <p class="eyebrow">Артель · Финбот · сборка требований</p>
+    <h1>Требования и разночтения</h1>
+    <p class="lede">Свод желаний участников к общему финансовому боту: где мы сходимся, где несовместимы и что предлагается делать с несовместимым. Документ для ознакомления перед голосованием.</p>
+
+    <div class="meta-grid">
+      <div class="meta-cell"><p class="k">Версия</p><p class="v tabular">1</p></div>
+      <div class="meta-cell"><p class="k">Дата</p><p class="v">18 июля 2026</p></div>
+      <div class="meta-cell"><p class="k">Статус</p><p class="v">Черновик к голосованию</p></div>
+      <div class="meta-cell"><p class="k">Авторов сдали</p><p class="v tabular">3 из 5</p></div>
+      <div class="meta-cell"><p class="k">Требований</p><p class="v tabular">24 · 8 в согласии</p></div>
+      <div class="meta-cell"><p class="k">Разночтений</p><p class="v tabular">7 · 6 на голос.</p></div>
+    </div>
+
+    <p class="dist"><b>Кому:</b>
+      <span class="who">Василий · Илья · Владимир</span>
+      <span class="who out">· Данил — нет данных · Артём — нет данных</span>
+    </p>
+
+    <div class="callout-draft">
+      <b>Это черновик, а не решение.</b> «Согласовано» появляется у пункта только после
+      голосования артели. Разночтения не сглажены сознательно — они и есть главный
+      результат этапа. Пункты Данила и Артёма ещё не учтены: их требования остаются
+      незаполненными, каркас неполон.
+    </div>
+  </header>
+
+  <!-- ============ LEGEND ============ -->
+  <section class="reveal">
+    <div class="sec-head"><span class="n">Как читать</span><h2>Обозначения</h2></div>
+    <div class="legend">
+      <div><span class="chip agree">согласие · 3</span><span>хотят несколько авторов; перечислены все</span></div>
+      <div><span class="chip solo">одиночное</span><span>назвал один, остальные не против</span></div>
+      <div><span class="chip vote">на голосовании</span><span>несовместимо, выносится на голос</span></div>
+      <div><span class="chip clarify">уточнить</span><span>скорее согласуемо, нужен порядок</span></div>
+      <div><span style="font-family:var(--mono);color:var(--accent-ink);font-size:.8rem">[Автор · дата]</span><span>дата — из git, когда требование попало в репозиторий</span></div>
+      <div><span style="font-family:var(--mono);color:var(--accent-ink);font-size:.72rem;letter-spacing:.1em;">РЕКОМЕНДАЦИЯ</span><span>совет Claude, не решение — голос за артелью</span></div>
+    </div>
+  </section>
+
+  <!-- ============ AGREED ============ -->
+  <section class="reveal">
+    <div class="sec-head"><span class="n">Часть I</span><h2>Согласованное <span class="count">каркас продукта</span></h2></div>
+
+    <div class="theme">
+      <h3>Автоматизация</h3>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Минимум ручного труда</span><span class="chip agree">согласие · 3</span></div>
+        <p>Данные приходят из источников сами, ручной ввод — не основной режим. Источник — банки и документы, а не ежедневная дисциплина в таблице.</p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span><span class="t">Илья · 2026-07-13</span><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Realtime не нужен</span><span class="chip solo">одиночное</span></div>
+        <p>Достаточно актуализировать данные раз в неделю-месяц.</p>
+        <div class="tags"><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+    </div>
+
+    <div class="theme">
+      <h3>Источники данных и ввод</h3>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Много банков из разных стран — в одной картине</span><span class="chip agree">согласие · 3</span></div>
+        <p>Счета разбросаны по странам (Испания, Россия, США, СНГ) и валютам; видеть всё в одном месте без переключения между приложениями банков.</p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span><span class="t">Илья · 2026-07-13</span><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Open Banking желателен как источник</span><span class="chip agree">согласие · 3</span></div>
+        <p>Прямое подключение к банку по API хотят все трое. <span class="note">Обязателен ли он как основной канал — см. разночтение о канале данных.</span></p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span><span class="t">Илья · 2026-07-13</span><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Крипта как источник</span><span class="chip solo">одиночное</span></div>
+        <p>Биржи через API, кошельки через сеть (ETH/SOL-трекеры). Пока вручную, хочется автоматизировать.</p>
+        <div class="tags"><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Лог пояснялок + Siri</span><span class="chip solo">одиночное</span></div>
+        <p>Короткие заметки в чат («50 € за клининг») как подсказка боту для непонятных переводов; голосовой ввод через Siri, особенно для наличных.</p>
+        <div class="tags"><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Ввод выписок через Share</span><span class="chip solo">одиночное</span></div>
+        <p>Шарить PDF прямо из банка в бот, а не раскладывать файлы в папку руками.</p>
+        <div class="tags"><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+    </div>
+
+    <div class="theme">
+      <h3>Категоризация</h3>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Свои категории с иерархией</span><span class="chip agree">согласие · 2</span></div>
+        <p>Иерархия «категория → подкатегория» / «супер → под», которую пользователь кроит сам; сворачивание при анализе. Не навязанный список.</p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Бот учится и не переспрашивает</span><span class="chip agree">согласие · 2</span></div>
+        <p>Правила и поправки бот запоминает. Приоритет: правки пользователя → общие справочники → внешние сервисы. Базовый разбор работает без платных ключей.</p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Сырьё сохраняется</span><span class="chip solo">одиночное</span></div>
+        <p>Чтобы позже переразбить категории или пере-обработать старые данные под новую структуру.</p>
+        <div class="tags"><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Сплит одной покупки на категории</span><span class="chip solo">одиночное</span></div>
+        <p>Amazon-«мега-покупка»: одна транзакция, внутри книга + бытовое + подарок. <span class="note">Помечено автором как нерешённое желание, не готовое решение.</span></p>
+        <div class="tags"><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+    </div>
+
+    <div class="theme">
+      <h3>Мультивалютность</h3>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Итог в одной валюте, два режима</span><span class="chip agree">согласие · 2</span></div>
+        <p>При анализе всё сводится в выбранную валюту, при сверке счетов — работа в исходных. Оригинальная сумма сохраняется, курсы подтягиваются сами.</p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+    </div>
+
+    <div class="theme">
+      <h3>Точность и проверяемость</h3>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Деньги считаются точно, ошибки ловятся</span><span class="chip agree">согласие · 2</span></div>
+        <p>Копейки не «плывут» от округлений; бот не должен тихо ошибаться так, что не поймать. Проверяемость — через снимки счетов, контрольные суммы, sanity-метрики.</p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+    </div>
+
+    <div class="theme">
+      <h3>Аналитика и доступ</h3>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Поиск любой траты</span><span class="chip solo">одиночное</span></div>
+        <p>По мерчанту, фильтры по дате, категории, сумме, типу (расход/доход).</p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Аналитика, а не просто список</span><span class="chip solo">одиночное</span></div>
+        <p>Помесячно доход/расход, разбивка по категориям, топ мерчантов; клик по категории на графике → провалиться в её транзакции.</p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Дашборд + доступ через своих агентов (MCP)</span><span class="chip solo">одиночное</span></div>
+        <p>Обращаться к боту как к финаналитику: что потратил, где неочевидные расходы, что проверить — краткая сводка.</p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Предсказание ближайших трат</span><span class="chip solo">одиночное</span></div>
+        <p>Аренда, кредиты, поездки, налоги, регулярные обязательства. Авто-распознавание повторяющихся платежей + ручное добавление.</p>
+        <div class="tags"><span class="t">Илья · 2026-07-13</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Пуши в двух случаях</span><span class="chip solo">одиночное</span></div>
+        <p>(1) бот не смог классифицировать перевод и спрашивает «что это?»; (2) давно не вводил данные — пора. Отдельного приложения не требуется.</p>
+        <div class="tags"><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+    </div>
+
+    <div class="theme">
+      <h3>Хранение данных</h3>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Данные принадлежат пользователю, без вендор-локина</span><span class="chip agree">согласие · 3</span></div>
+        <p>Хранятся в своём хранилище (Dropbox / свой сервер / NAS), забрать всё можно в любой момент. Без зависимости от чужого постоянного бэкенда. <span class="note">Насколько строго «локально» — см. разночтение о приватности.</span></p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span><span class="t">Илья · 2026-07-13</span><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+    </div>
+
+    <div class="theme">
+      <h3>Предпринимательский / налоговый слой</h3>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Цифровой gestor для autónomo и ИП</span><span class="chip solo">одиночное</span></div>
+        <p>Собирает материал по предпринимательской деятельности, помогает готовить отчётность и налоги. Не заменяет бухгалтера, снимает рутину сбора данных.</p>
+        <div class="tags"><span class="t">Илья · 2026-07-13</span></div>
+      </div>
+    </div>
+
+    <div class="theme">
+      <h3>Персонализация и форк</h3>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Форкнуть и допилить под себя</span><span class="chip solo">одиночное</span></div>
+        <p>Свой банк, свои категории, свой вид — не переписывая продукт целиком. Общий фундамент, сверху тонкий слой под каждого.</p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Свой скин поверх общих сценариев</span><span class="chip solo">одиночное</span></div>
+        <p>Настраивать оформление (тема, цвета, скин), но пользовательские сценарии — общие для артели. Персонализация — слой оформления, а не пять разных продуктов.</p>
+        <div class="tags"><span class="t">Василий · 2026-07-11</span></div>
+      </div>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Совместность с партнёром</span><span class="chip solo">одиночное</span></div>
+        <p>Общий бюджет с женой; в формате бота в общем канале решается само; если появится приложение — связать два в один аккаунт.</p>
+        <div class="tags"><span class="t">Владимир · 2026-07-11</span></div>
+      </div>
+    </div>
+
+    <div class="theme">
+      <h3>Связка чеков и транзакций</h3>
+      <div class="req">
+        <div class="req-top"><span class="req-title">Чек ↔ транзакция</span><span class="chip solo">одиночное</span></div>
+        <p>Связать чек с конкретной транзакцией по карте, показать разбивку по позициям. Полезно для поиска: начать с чека и дойти до транзакции. <span class="note">Нужны ли фото чеков вообще — см. разночтение о чеках.</span></p>
+        <div class="tags"><span class="t">Василий · 2026-07-10</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTRADICTIONS ============ -->
+  <section class="reveal">
+    <div class="sec-head"><span class="n">Часть II</span><h2>Разночтения <span class="count">на голосование</span></h2></div>
+
+    <!-- 1 -->
+    <article class="cx">
+      <div class="cx-head"><h3><span class="mark">⚠</span>Основной интерфейс доступа</h3><span class="chip vote">на голосовании</span></div>
+      <ul class="sides">
+        <li class="side"><span class="lab">A</span><span class="body">Android-приложение — основной интерфейс, десктоп не нужен. <span class="tag">Илья · 2026-07-13</span></span></li>
+        <li class="side"><span class="lab">B</span><span class="body">Отдельного приложения не нужно, хватает телеграм-бота / канала. <span class="tag">Владимир · 2026-07-11</span></span></li>
+        <li class="side"><span class="lab">C</span><span class="body">Дашборд в одном месте + доступ через свой MCP-слой агентов. <span class="tag">Василий · 2026-07-10</span></span></li>
+      </ul>
+      <p class="prop"><b>Предложение:</b> развести «канал ввода/уведомлений» и «поверхность анализа». Ядро — headless (бот + API/MCP), поверх — тонкие клиенты: телеграм-бот, Android, дашборд+MCP.</p>
+      <div class="rec"><p class="rl">Рекомендация</p>headless-ядро + телеграм-бот как общий MVP-клиент (наименьший общий знаменатель — работает у всех, Владимиру достаточно); Android и дашборд+MCP — личные слои поверх, после MVP. Укладывается в модель «общий flow + свой скин».</div>
+      <div class="cx-foot"><div class="f"><span class="fk">Статус</span><span class="chip vote">на голосовании</span></div><div class="f"><span class="fk">Решение</span><span class="decision">—</span></div></div>
+    </article>
+
+    <!-- 2 -->
+    <article class="cx">
+      <div class="cx-head"><h3><span class="mark">⚠</span>Фото чеков как источник</h3><span class="chip vote">на голосовании</span></div>
+      <ul class="sides">
+        <li class="side"><span class="lab">A</span><span class="body">Фото чеков нужны, участвуют в общей картине; связка чек ↔ транзакция по позициям. <span class="tag">Василий · 2026-07-10 · Илья · 2026-07-13</span></span></li>
+        <li class="side"><span class="lab">B</span><span class="body">Фото чеков не нужны — «не понимаю, зачем они». <span class="tag">Владимир · 2026-07-11</span></span></li>
+      </ul>
+      <p class="prop"><b>Предложение:</b> чеки — опциональный модуль-источник, выключен по умолчанию; ядро от него не зависит.</p>
+      <div class="rec"><p class="rl">Рекомендация</p>заложить чеки как опциональный плагин-источник с первого дня, но вне happy-path общего MVP. Кто хочет (Василий, Илья) — включает; Владимир не затронут. Голосуем только о том, входит ли модуль в общий MVP-скоуп или в личный слой.</div>
+      <div class="cx-foot"><div class="f"><span class="fk">Статус</span><span class="chip vote">на голосовании</span></div><div class="f"><span class="fk">Решение</span><span class="decision">—</span></div></div>
+    </article>
+
+    <!-- 3 -->
+    <article class="cx">
+      <div class="cx-head"><h3><span class="mark">⚠</span>Приватность и облако</h3><span class="chip vote">на голосовании</span></div>
+      <ul class="sides">
+        <li class="side"><span class="lab">A</span><span class="body">Локально по умолчанию, неизменяемо; приватность — жёсткое условие, не опция. <span class="tag">Василий · 2026-07-10</span></span></li>
+        <li class="side"><span class="lab">B</span><span class="body">Данные в моём хранилище (Dropbox/NAS/сервер), без чужого бэкенда; LLM и облако для обработки — норм. <span class="tag">Илья · 2026-07-13</span></span></li>
+        <li class="side"><span class="lab">C</span><span class="body">Жёсткой красной линии нет; достаточно GDPR, к облакам нормально, хотелось бы шифрование PII. <span class="tag">Владимир · 2026-07-11</span></span></li>
+      </ul>
+      <p class="prop"><b>Предложение:</b> общий инвариант — «данные принадлежат пользователю, storage свой». Поверх — профили приватности: строгий (всё локально) и смешанный (облачный LLM).</p>
+      <div class="rec"><p class="rl">Рекомендация</p>строгий-локальный профиль — <b>по умолчанию</b>, облачная обработка — явный opt-in. Так ничья красная линия не пересечена: у Василия приватность не «опция, которую надо включать» (его жёсткое условие), а Илья и Владимир осознанно включают облако. Ключ голосования — именно значение по умолчанию.</div>
+      <div class="cx-foot"><div class="f"><span class="fk">Статус</span><span class="chip vote">на голосовании</span></div><div class="f"><span class="fk">Решение</span><span class="decision">—</span></div></div>
+    </article>
+
+    <!-- 4 -->
+    <article class="cx">
+      <div class="cx-head"><h3><span class="mark">⚠</span>Основной канал получения банковских данных</h3><span class="chip vote">на голосовании</span></div>
+      <ul class="sides">
+        <li class="side"><span class="lab">A</span><span class="body">Open Banking обязателен; к ручным выгрузкам возвращаться не хочу. <span class="tag">Илья · 2026-07-13</span></span></li>
+        <li class="side"><span class="lab">B</span><span class="body">Именно PDF-выписки как основной источник (номера счетов, суб-счета Revolut); Open Banking — «хотел бы», но не сейчас. <span class="tag">Владимир · 2026-07-11</span></span></li>
+        <li class="side"><span class="lab">C</span><span class="body">Файловая выгрузка работает сейчас; Open Banking хочу как дополнение; банк нестандартный — важна поддержка любых форматов. <span class="tag">Василий · 2026-07-10</span></span></li>
+      </ul>
+      <p class="prop"><b>Предложение:</b> мульти-источник как обязательный инвариант ядра (Open Banking + файл/PDF + ручные пояснялки), приоритет источника — настройка пользователя.</p>
+      <div class="rec"><p class="rl">Рекомендация</p>файл/PDF — <b>обязателен в MVP</b> (универсален, работает у всех уже сегодня); Open Banking — <b>инкрементально, по банкам, не gate релиза</b>. Покрытие OB по РФ/крипте дырявое, Владимир живёт на PDF. Илье это даёт путь к OB, но с файловым fallback там, где OB нет, — иначе его собственное «плохо, если OB сводится к ручным выгрузкам» неразрешимо в принципе.</div>
+      <div class="cx-foot"><div class="f"><span class="fk">Статус</span><span class="chip vote">на голосовании</span></div><div class="f"><span class="fk">Решение</span><span class="decision">—</span></div></div>
+    </article>
+
+    <!-- 5 -->
+    <article class="cx">
+      <div class="cx-head"><h3><span class="mark">⚠</span>Потолок стоимости</h3><span class="chip vote">на голосовании</span></div>
+      <ul class="sides">
+        <li class="side"><span class="lab">A</span><span class="body">Дороже ~20 €/мес (≈ 240 €/год) продукт теряет смысл. <span class="tag">Илья · 2026-07-13</span></span></li>
+        <li class="side"><span class="lab">B</span><span class="body">Дороже 40 €/год — непригоден. <span class="tag">Владимир · 2026-07-11</span></span></li>
+        <li class="side ctx"><span class="lab">·</span><span class="body">Василий явного потолка не ставит, но «жечь токены впустую» — плохо; базовый разбор должен работать без платных ключей. — Василий · 2026-07-10</span></li>
+      </ul>
+      <p class="prop"><b>Предложение:</b> разница почти 6× — это про модель стоимости, а не про «среднее». Целиться в near-zero базовую стоимость, платные внешние сервисы — опция.</p>
+      <div class="rec"><p class="rl">Рекомендация</p>проектировать под <b>near-zero базовую стоимость</b> — локальный разбор без обязательных платных ключей, кэш ответов модели; платные внешние сервисы — opt-in за качество. Тогда выполнимы оба потолка одновременно. Голосуем за модель стоимости, а не за число. Явный win-win, самое лёгкое из разночтений.</div>
+      <div class="cx-foot"><div class="f"><span class="fk">Статус</span><span class="chip vote">на голосовании</span></div><div class="f"><span class="fk">Решение</span><span class="decision">—</span></div></div>
+    </article>
+
+    <!-- 6 -->
+    <article class="cx soft">
+      <div class="cx-head"><h3><span class="mark">◆</span>Суть продукта: выверенная база против аналитики</h3><span class="chip clarify">уточнить</span></div>
+      <ul class="sides">
+        <li class="side"><span class="lab">A</span><span class="body">Главная ценность — сырая, но <b>проверенная</b> база транзакций; графики вторичны. <span class="tag">Владимир · 2026-07-11</span></span></li>
+        <li class="side"><span class="lab">B</span><span class="body">Ценность — аналитика, дашборд, агент-финаналитик поверх данных. <span class="tag">Василий · 2026-07-10</span></span></li>
+        <li class="side ctx"><span class="lab">·</span><span class="body">Илья ближе к B: агрегация + предсказание трат + gestor. — Илья · 2026-07-13</span></li>
+      </ul>
+      <p class="prop"><b>Предложение:</b> скорее не взаимоисключающе. Выверенная база — фундамент-инвариант, аналитика и агент — слой поверх.</p>
+      <div class="rec"><p class="rl">Рекомендация</p>не выносить как «или-или». Зафиксировать <b>порядок</b>: сначала доверие к данным (выверенная база — инвариант), потом визуализация и агент поверх. Аналитика на непроверенных данных бесполезна всем — база первична по времени, а не по важности. Голосуем за очерёдность.</div>
+      <div class="cx-foot"><div class="f"><span class="fk">Статус</span><span class="chip clarify">уточнить</span></div><div class="f"><span class="fk">Решение</span><span class="decision">—</span></div></div>
+    </article>
+  </section>
+
+  <!-- ============ NEXT / VERSIONS ============ -->
+  <section class="reveal">
+    <div class="sec-head"><span class="n">Часть III</span><h2>Следующий шаг и версии</h2></div>
+
+    <ol class="steps">
+      <li><p><b>Ознакомьтесь и возразите.</b> Читаете свод, сверяете, верно ли переданы ваши требования и стороны разночтений. Неточность в вашем блоке — пишете, поправим в источнике.</p></li>
+      <li><p><b>Данил и Артём заполняют требования.</b> Пока их пункты — «нет данных». С их голосами расстановка сторон может измениться.</p></li>
+      <li><p><b>Голосуем по каждому разночтению.</b> Шесть пунктов «на голосовании» + один «уточнить». Итог фиксируется в поле «Решение» со ссылкой на протокол встречи; проигравшая сторона не удаляется.</p></li>
+      <li><p><b>Пересборка → новая версия.</b> Правки едут в личные <code>requirements.md</code>, скилл пересобирает свод, документ выходит версией 2 по той же ссылке.</p></li>
+    </ol>
+
+    <table class="ver">
+      <thead><tr><th>Версия</th><th>Дата</th><th>Что изменилось</th></tr></thead>
+      <tbody>
+        <tr><td class="v">v1</td><td class="v">18.07.2026</td><td>Первая сборка из требований Василия, Ильи, Владимира. 24 требования, 7 разночтений. Данил и Артём — нет данных.</td></tr>
+        <tr><td class="v" style="color:var(--muted)">v2</td><td class="v" style="color:var(--muted)">—</td><td style="color:var(--muted)">Ожидается: голоса Данила и Артёма, итоги голосования по разночтениям.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>Источник правды — <code>common/prd.md</code> и <code>common/contradictions.md</code> в репозитории <code>artel-finbot</code>, версионируются через git. Свод пересобирается скиллом <code>assemble-requirements</code>; даты требований берутся из истории коммитов. Этот документ — рендер версии 1 для рассылки.</p>
+    <p style="margin-top:10px;color:var(--muted)">Черновик к голосованию · не для публикации за пределами артели · 18 июля 2026.</p>
+  </footer>
+</div>
+</body>
+</html>
